@@ -83,7 +83,6 @@ const searchImg = event => {
         buildGallery(arr.hits);
         page++;
         enableBtn();
-        console.log(page);
       }
     })
 
@@ -94,6 +93,7 @@ const loadMore = () => {
   fetchImg(searchValue)
     .then(arr => {
       buildGallery(arr.hits);
+      scroll();
       if ((page - 1) * limitPerPage > arr.totalHits) {
         Notify.info(
           `We're sorry, but you've reached the end of search results.`
@@ -114,3 +114,14 @@ let lightbox = new SimpleLightbox('.photo-card a', {
   captionDelay: 250,
   showCounter: false,
 });
+
+function scroll() {
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 3,
+    behavior: 'smooth',
+  });
+}
