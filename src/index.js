@@ -27,6 +27,7 @@ const params = new URLSearchParams({
 const clearGallery = () => {
   gallery.innerHTML = '';
   isPrinted = false;
+  window.scroll(0, 0);
 };
 
 const buildGallery = arr => {
