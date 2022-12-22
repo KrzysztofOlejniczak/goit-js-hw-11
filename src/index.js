@@ -9,10 +9,12 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const searchForm = document.querySelector('form#search-form');
 const gallery = document.querySelector('div.gallery');
 const moreBtn = document.querySelector('button.load-more');
+const switchBox = document.querySelector('.onoffswitch>input');
 
 let page = 1;
 const limitPerPage = 40;
 let searchValue = '';
+let isPrinted = false;
 
 const params = new URLSearchParams({
   key: '32245226-f27b1af2cde9216d3910bfcd8',
@@ -24,6 +26,7 @@ const params = new URLSearchParams({
 
 const clearGallery = () => {
   gallery.innerHTML = '';
+  isPrinted = false;
 };
 
 const buildGallery = arr => {
@@ -48,6 +51,7 @@ const buildGallery = arr => {
       </div>
       </div>`;
     gallery.innerHTML += markup;
+    isPrinted = true;
     lightbox.refresh();
   });
 };
@@ -57,6 +61,11 @@ const disableBtn = () => {
 };
 const enableBtn = () => {
   moreBtn.classList.remove('hidden');
+};
+
+const loadPage = () => {
+  disableBtn();
+  switchBox.checked = localStorage.getItem('toggle') === 'true' ? true : false;
 };
 
 const fetchImg = async search => {
@@ -82,7 +91,9 @@ const searchImg = event => {
         Notify.success(`Hooray! We found ${arr.totalHits} images.`);
         buildGallery(arr.hits);
         page++;
-        enableBtn();
+        if (!switchBox.checked) {
+          enableBtn();
+        }
       }
     })
 
@@ -105,13 +116,12 @@ const loadMore = () => {
     .catch(error => Notify.failure(error.response.data));
 };
 
-window.addEventListener('load', disableBtn);
+window.addEventListener('load', loadPage);
 searchForm.addEventListener('submit', searchImg);
 moreBtn.addEventListener('click', loadMore);
 
 let lightbox = new SimpleLightbox('.photo-card a', {
-  captionsData: 'alt',
-  captionDelay: 250,
+  captions: false,
   showCounter: false,
 });
 
@@ -125,3 +135,24 @@ function scroll() {
     behavior: 'smooth',
   });
 }
+
+switchBox.addEventListener('change', () => {
+  localStorage.setItem('toggle', switchBox.checked);
+  if (switchBox.checked) {
+    disableBtn();
+  } else {
+    if (isPrinted) {
+      enableBtn();
+    }
+  }
+});
+
+window.addEventListener('scroll', () => {
+  if (
+    window.scrollY + window.innerHeight >=
+      document.documentElement.scrollHeight &&
+    switchBox.checked
+  ) {
+    loadMore();
+  }
+});
