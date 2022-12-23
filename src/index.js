@@ -134,7 +134,6 @@ function scroll() {
     .querySelector('.gallery')
     .firstElementChild.getBoundingClientRect();
 
-  console.log('scroll');
   window.scrollBy({
     top: cardHeight * 3,
     behavior: 'smooth',
