@@ -15,6 +15,7 @@ let page = 1;
 const limitPerPage = 40;
 let searchValue = '';
 let isPrinted = false;
+let limitReached = false;
 
 const params = new URLSearchParams({
   key: '32245226-f27b1af2cde9216d3910bfcd8',
@@ -78,6 +79,7 @@ const fetchImg = async search => {
 
 const searchImg = event => {
   page = 1;
+  limitReached = false;
   event.preventDefault();
   searchValue = event.target[0].value;
   clearGallery();
@@ -92,6 +94,7 @@ const searchImg = event => {
         Notify.success(`Hooray! We found ${arr.totalHits} images.`);
         buildGallery(arr.hits);
         page++;
+        limitReached = arr.totalHits < limitPerPage;
         if (!switchBox.checked) {
           enableBtn();
         }
@@ -102,16 +105,16 @@ const searchImg = event => {
 };
 
 const loadMore = () => {
+  if (limitReached) {
+    Notify.info(`We're sorry, but you've reached the end of search results.`);
+    disableBtn();
+    return;
+  }
   fetchImg(searchValue)
     .then(arr => {
+      limitReached = page * limitPerPage > arr.totalHits;
       buildGallery(arr.hits);
       scroll();
-      if ((page - 1) * limitPerPage > arr.totalHits) {
-        Notify.info(
-          `We're sorry, but you've reached the end of search results.`
-        );
-        disableBtn();
-      }
       page++;
     })
     .catch(error => Notify.failure(error.response.data));
@@ -131,6 +134,7 @@ function scroll() {
     .querySelector('.gallery')
     .firstElementChild.getBoundingClientRect();
 
+  console.log('scroll');
   window.scrollBy({
     top: cardHeight * 3,
     behavior: 'smooth',
